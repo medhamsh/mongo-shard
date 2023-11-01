@@ -1,0 +1,9 @@
+---
+- name: Restore MongoDB Backup using PBM
+  hosts: mongos_servers
+  become: yes
+  vars_files:
+    - vars/percona_vars.yml
+  tasks:
+    - name: Restore MongoDB from a specific backup
+      command: pbm restore --backup-name={{ backup_name }}

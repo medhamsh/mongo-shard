@@ -1,0 +1,14 @@
+---
+- name: Schedule MongoDB Backups using PBM
+  hosts: mongos_servers  # Assuming you want to run the backup command from a mongos server
+  become: yes
+  vars_files:
+    - vars/percona_vars.yml
+  tasks:
+    - name: Schedule daily backups using cron
+      cron:
+        name: "PBM MongoDB Backup"
+        minute: "0"
+        hour: "2"
+        job: "pbm backup"
+

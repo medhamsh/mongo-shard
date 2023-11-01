@@ -1,0 +1,11 @@
+pbm_download_url: "https://www.percona.com/downloads/pbm-latest/binaries/tarball"
+mongodb_user: "your_mongodb_user"
+mongodb_password: "your_mongodb_password"
+mongodb_port: 27017
+
+# Backup Scheduling
+backup_minute: "0"
+backup_hour: "2"
+
+# Restore
+backup_name: "your_backup_name"

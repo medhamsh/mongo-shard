@@ -1,0 +1,27 @@
+---
+- name: Install Percona Backup for MongoDB
+  hosts: all
+  become: yes
+  vars_files:
+    - vars/percona_vars.yml
+  tasks:
+    - name: Download PBM binaries
+      get_url:
+        url: "{{ item }}"
+        dest: "/usr/local/bin/"
+        mode: '0755'
+      loop:
+        - "{{ pbm_download_url }}/pbm"
+        - "{{ pbm_download_url }}/pbm-agent"
+
+    - name: Ensure MongoDB tools are installed
+      apt:
+        name: mongodb-org-tools
+        state: present
+
+    - name: Start pbm-agent
+      command: pbm-agent --mongodb-uri="mongodb://{{ mongodb_user }}:{{ mongodb_password }}@localhost:{{ mongodb_port }}"
+      async: 10
+      poll: 0
+      ignore_errors: yes
+
