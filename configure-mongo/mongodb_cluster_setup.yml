@@ -1,0 +1,73 @@
+---
+- name: Install MongoDB on all servers
+  hosts: all
+  become: yes
+  tasks:
+    - name: Import the MongoDB public key
+      apt_key:
+        keyserver: "hkp://keyserver.ubuntu.com:80"
+        id: "9DA31620334BD75D9DCB49F368818C72E52529D4"
+
+    - name: Add the MongoDB repository
+      apt_repository:
+        repo: "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.4 multiverse"
+        update_cache: yes
+
+    - name: Install MongoDB packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - mongodb-org
+        - mongodb-org-server
+        - mongodb-org-shell
+        - mongodb-org-mongos
+        - mongodb-org-tools
+
+    - name: Start and enable MongoDB service
+      service:
+        name: mongod
+        state: started
+        enabled: yes
+
+- name: Configure MongoDB for Config Servers
+  hosts: config_servers
+  become: yes
+  tasks:
+    - name: Setup mongod.conf for Config Servers
+      template:
+        src: mongod_config_server.conf.j2
+        dest: /etc/mongod.conf
+      notify: Restart MongoDB
+
+- name: Configure MongoDB for Shard Servers
+  hosts: shard_servers
+  become: yes
+  tasks:
+    - name: Setup mongod.conf for Shard Servers
+      template:
+        src: mongod_shard_server.conf.j2
+        dest: /etc/mongod.conf
+      notify: Restart MongoDB
+
+- name: Configure MongoDB for Mongos Servers
+  hosts: mongos_servers
+  become: yes
+  tasks:
+    - name: Setup mongos.conf for Mongos Servers
+      template:
+        src: mongos.conf.j2
+        dest: /etc/mongos.conf
+      notify: Restart Mongos
+
+  handlers:
+    - name: Restart MongoDB
+      service:
+        name: mongod
+        state: restarted
+
+    - name: Restart Mongos
+      service:
+        name: mongos
+        state: restarted
+
